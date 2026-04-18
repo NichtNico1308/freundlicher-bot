@@ -1,6 +1,0 @@
-2026/04/10-20:09:40.153 4750 Reusing MANIFEST C:\Users\stang\mein-bot\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2026/04/10-20:09:40.173 4750 Recovering log #3
-2026/04/10-20:09:40.183 4750 Reusing old log C:\Users\stang\mein-bot\.wwebjs_auth\session\Default\Local Storage\leveldb/000003.log 
-2026/04/10-21:27:55.821 4a80 Level-0 table #5: started
-2026/04/10-21:27:55.870 4a80 Level-0 table #5: 18204 bytes OK
-2026/04/10-21:27:55.874 4a80 Delete type=0 #3
