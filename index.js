@@ -59,10 +59,18 @@ const lowOwnerBefehle = ['menu', 'info', 'pingms', 'save', 'sticker']
 
 const client = new Client({
     authStrategy: new LocalAuth(),
-    ,
-    pairingCodeEnabled: true,   // ← NEU
-    pairingCodeOptions: {
-        phoneNumber: '4916093491507'  // ← NEU
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
     }
 })
 
