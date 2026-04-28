@@ -80,7 +80,7 @@ async function startBot() {
         version,
         auth: state,
         logger: P({ level: 'silent' }),
-        printQRInTerminal: true,
+        printQRInTerminal: false,
         browser: ['Freundlicher-Bot', 'Chrome', '1.0.0']
     })
  
