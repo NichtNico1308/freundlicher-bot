@@ -96,9 +96,12 @@ async function startBot() {
 })
 
 if (!sock.authState.creds.registered) {
-    await new Promise(r => setTimeout(r, 3000))
-    const code = await sock.requestPairingCode('4916093491507')
-    console.log(`🔑 Dein Pairing Code: ${code}`)
+    sock.ev.on('connection.update', async ({ connection }) => {
+        if (connection === 'open') {
+            const code = await sock.requestPairingCode('4916093491507')
+            console.log(`🔑 Dein Pairing Code: ${code}`)
+        }
+    })
 }
  
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
