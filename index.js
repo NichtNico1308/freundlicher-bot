@@ -96,8 +96,8 @@ async function startBot() {
 })
 
 if (!sock.authState.creds.registered) {
-    const nummer = '4916093491507'
-    const code = await sock.requestPairingCode(nummer)
+    await new Promise(r => setTimeout(r, 3000))
+    const code = await sock.requestPairingCode('4916093491507')
     console.log(`🔑 Dein Pairing Code: ${code}`)
 }
  
