@@ -75,51 +75,37 @@ function sleep(ms) {
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')
     const { version } = await fetchLatestBaileysVersion()
-
+ 
     const sock = makeWASocket({
         version,
         auth: state,
         logger: P({ level: 'silent' }),
-        printQRInTerminal: false,
+        printQRInTerminal: true,
         browser: ['Freundlicher-Bot', 'Chrome', '1.0.0']
     })
-
+ 
     sock.ev.on('creds.update', saveCreds)
-
+ 
+    let pairingCodeRequested = false
+ 
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
-        console.log('Status:', connection)
-        if (connection === 'open') {
-            console.log(`✅ ${botName} ist verbunden!`)
-            if (!sock.authState.creds.registered) {
+        if (qr && !pairingCodeRequested) {
+            pairingCodeRequested = true
+            try {
                 const code = await sock.requestPairingCode('4916093491507')
                 console.log(`🔑 Dein Pairing Code: ${code}`)
+            } catch (e) {
+                console.log('Pairing Code Fehler:', e.message)
             }
-        } else if (connection === 'close') {
+        }
+        if (connection === 'close') {
             const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
+            console.log('Verbindung getrennt. Neustart:', shouldReconnect)
             if (shouldReconnect) startBot()
+        } else if (connection === 'open') {
+            console.log(`✅ ${botName} ist verbunden!`)
         }
     })
-}
- 
-    sock.ev.on('creds.update', saveCreds)
- 
-   sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
-    if (connection === 'open') {
-        console.log(`✅ ${botName} ist verbunden!`)
-    } else if (connection === 'close') {
-        const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
-        if (shouldReconnect) startBot()
-    }
-})
-
-if (!sock.authState.creds.registered) {
-    sock.ev.on('connection.update', async ({ connection }) => {
-        if (connection === 'open') {
-            const code = await sock.requestPairingCode('4916093491507')
-            console.log(`🔑 Dein Pairing Code: ${code}`)
-        }
-    })
-}
  
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return
@@ -569,14 +555,3 @@ Willkommen! Hier sind alle Befehle 🌳
             let buffer = Buffer.alloc(0)
             for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
             if (!fs.existsSync('gespeichert')) fs.mkdirSync('gespeichert')
-            const dateiname = `gespeichert/${Date.now()}.${isVideo ? 'mp4' : 'jpg'}`
-            fs.writeFileSync(dateiname, buffer)
-            await reply('🌿 Gespeichert!')
-        } catch (e) {
-            await reply('❌ Fehler beim Speichern!')
-            console.error(e)
-        }
-    }
-}
- 
-startBot()
