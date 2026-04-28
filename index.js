@@ -86,19 +86,20 @@ async function startBot() {
  
     sock.ev.on('creds.update', saveCreds)
  
-   sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
-    if (qr) {
-        const qrcode = require('qrcode-terminal')
-        qrcode.generate(qr, { small: true })
-        console.log('📱 QR-Code scannen!')
-    }
-    if (connection === 'close') {
+   sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+    if (connection === 'open') {
+        console.log(`✅ ${botName} ist verbunden!`)
+    } else if (connection === 'close') {
         const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
         if (shouldReconnect) startBot()
-    } else if (connection === 'open') {
-        console.log(`✅ ${botName} ist verbunden!`)
     }
 })
+
+if (!sock.authState.creds.registered) {
+    const nummer = '4916093491507'
+    const code = await sock.requestPairingCode(nummer)
+    console.log(`🔑 Dein Pairing Code: ${code}`)
+}
  
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         if (type !== 'notify') return
