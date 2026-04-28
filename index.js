@@ -75,7 +75,7 @@ function sleep(ms) {
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')
     const { version } = await fetchLatestBaileysVersion()
- 
+
     const sock = makeWASocket({
         version,
         auth: state,
@@ -83,6 +83,23 @@ async function startBot() {
         printQRInTerminal: false,
         browser: ['Freundlicher-Bot', 'Chrome', '1.0.0']
     })
+
+    sock.ev.on('creds.update', saveCreds)
+
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
+        console.log('Status:', connection)
+        if (connection === 'open') {
+            console.log(`✅ ${botName} ist verbunden!`)
+            if (!sock.authState.creds.registered) {
+                const code = await sock.requestPairingCode('4916093491507')
+                console.log(`🔑 Dein Pairing Code: ${code}`)
+            }
+        } else if (connection === 'close') {
+            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
+            if (shouldReconnect) startBot()
+        }
+    })
+}
  
     sock.ev.on('creds.update', saveCreds)
  
